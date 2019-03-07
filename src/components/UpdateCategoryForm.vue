@@ -177,20 +177,34 @@
       },
 
       deleteCategory(item) {
-        if (confirm("Delete category: " + item.name + " ?")) {
-          axios.delete("http://localhost:8080/categories/" + item.id, {
-            headers: {
-              "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
-              "Content-type": 'application/json'
+        axios.get("http://localhost:8080/products/category/" + item.id, {
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
+            "Content-type": 'application/json'
+          }
+        }).then(
+          res => {
+            if (res.data.length == 0) {
+              if (confirm("Delete category: " + item.name + " ?")) {
+                axios.delete("http://localhost:8080/categories/" + item.id, {
+                  headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
+                    "Content-type": 'application/json'
+                  }
+                }).then(
+                  res => {
+                    console.log(res)
+                    this.resetData();
+                    this.readAllCategory();
+                  }
+                )
+              }
             }
-          }).then(
-            res => {
-              console.log(res)
-              this.resetData();
-              this.readAllCategory();
+            else {
+              alert("This category contain products !!!");
             }
-          )
-        }
+          }
+        )
       },
 
       isHavingProduct(item) {
