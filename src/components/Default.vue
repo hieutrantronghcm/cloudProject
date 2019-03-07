@@ -2,7 +2,7 @@
   <div>
     <b-navbar type="dark" variant="info">
       <b-navbar-brand>
-        <router-link class="link-color" to="/">Home</router-link>
+        <a href="/" class="link-color">Home</a>
       </b-navbar-brand>
       <b-navbar-nav>
         <b-nav-item>
@@ -39,15 +39,15 @@
             this.$router.push("/login")
           },
         goHome() {
-          this.$router.push('/');
+          this.$router.go();
         },
           tokenExist() {
             if (localStorage.getItem("cdpmToken") !== null) {
-              console.log("co token");
+              // console.log("co token");
               this.haveToken = true;
             }
             else {
-              console.log("ko co token");
+              // console.log("ko co token");
               this.haveToken = false;
             }
           },

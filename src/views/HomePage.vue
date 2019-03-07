@@ -1,22 +1,169 @@
-<template>
+<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
   <div>
-    <search-bar></search-bar>
+    <v-form>
+      <br>
+      <v-flex style="display: inline-flex">
+        <v-text-field v-model="searchValue" solo label="Search product" style="width: 500px"/>
+        <v-btn style="float: left;" @click="search">Search</v-btn>
+      </v-flex>
+    </v-form>
+
+    <div>
+      <v-container>
+        <v-data-iterator :items="products" content-tag="v-layout"
+                         row wrap :rows-per-page-items="rowsPerPageItems" hide-actions>
+          <template v-slot:item="props">
+            <v-flex xs12 sm6 md4 lg3>
+              <v-card class="m-4 clickable" @click="clickCard(props.item)">
+                <v-card-title style="color: #2196F3">
+                  <h3>{{props.item.name}}</h3>
+                </v-card-title>
+                <v-divider></v-divider>
+
+                <v-list dense>
+                  <v-list-tile>
+                    <v-list-tile-content>Price:</v-list-tile-content>
+                    <v-list-tile-content class="align-end" style="font-size: 24px">${{props.item.price}}</v-list-tile-content>
+                  </v-list-tile>
+                  <v-list-tile>
+                    <v-list-tile-content>Category:</v-list-tile-content>
+                    <v-list-tile-content class="align-end">{{props.item.category.name}}</v-list-tile-content>
+                  </v-list-tile>
+                  <v-list-tile>
+                    <v-list-tile-content>Supplier:</v-list-tile-content>
+                    <v-list-tile-content class="align-end">{{props.item.supplier.name}}</v-list-tile-content>
+                  </v-list-tile>
+                </v-list>
+                <v-card-actions>
+                  <v-btn class="mx-auto" color="error" @click="buyItem">Buy</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-flex>
+          </template>
+        </v-data-iterator>
+      </v-container>
+      <v-pagination v-model="pagination.page" :length="pagination.length" :total-visible="7"
+                    @next="readAllProduct" @input="readAllProduct" @previous="readAllProduct">
+
+      </v-pagination>
+    </div>
+
   </div>
 </template>
 
 <script>
-    import SearchBar from "@/components/SearchBar";
-    export default {
-        name: "HomePage",
-      components: {SearchBar},
-      methods: {
-          fun() {
-            this.searchByName()
+  import SearchBar from "@/components/SearchBar";
+  import axios from 'axios';
+
+  export default {
+    name: "HomePage",
+    components: {
+      'search-bar': SearchBar
+    },
+    data() {
+      return {
+        products: [],
+        searchValue: '',
+        rowsPerPageItems: [4, 8, 12],
+        pagination: {
+          page: 0,
+          size: 8,
+          sort: {
+            field: 'id',
+            order: 'ASC',
+          },
+          length: 6,
+        },
+        items: [
+          {
+            name: 'Frozen Yogurt',
+            calories: 159,
+            fat: 6.0,
+            carbs: 24,
+            protein: 4.0,
+            sodium: 87,
+            calcium: '14%',
+            iron: '1%'
+          },
+          {
+            name: 'Ice cream sandwich',
+            calories: 237,
+            fat: 9.0,
+            carbs: 37,
+            protein: 4.3,
+            sodium: 129,
+            calcium: '8%',
+            iron: '1%'
+          },
+          {
+            name: 'Eclair',
+            calories: 262,
+            fat: 16.0,
+            carbs: 23,
+            protein: 6.0,
+            sodium: 337,
+            calcium: '6%',
+            iron: '7%'
+          },
+          {
+            name: 'Cupcake',
+            calories: 305,
+            fat: 3.7,
+            carbs: 67,
+            protein: 4.3,
+            sodium: 413,
+            calcium: '3%',
+            iron: '8%'
           }
+        ]
       }
+    },
+    created: function () {
+      this.searchValue = '';
+      this.readAllProduct('');
+    },
+    methods: {
+      clickCard(item) {
+        // alert("click card " + item.name);
+      },
+      buyItem() {
+        alert("Buy")
+      },
+
+      search() {
+        this.pagination.page = 1;
+        this.readAllProduct();
+      },
+
+      readAllProduct() {
+        console.log("Reading all products ...")
+        var url = 'http://localhost:8080/products?' +
+          'page=' + (this.pagination.page - 1) + '&' +
+          'size=' + this.pagination.size + '&' +
+          'sort=' + this.pagination.sort.field + ',' + this.pagination.sort.order + '&' +
+          'searchValue=' + this.searchValue;
+        axios.get(url, {
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
+            "Content-type": 'application/json'
+          }
+        }).then(response => {
+          var data = response.data;
+          this.products = data.content;
+          this.pagination.page = data.pageable.pageNumber + 1;
+          this.pagination.length = data.totalPages;
+
+          console.log(data);
+        }).catch(
+          () => console.log("Cannot found any result!")
+        )
+      },
     }
+  }
 </script>
 
 <style scoped>
-
+  .clickable {
+    cursor: pointer;
+  }
 </style>

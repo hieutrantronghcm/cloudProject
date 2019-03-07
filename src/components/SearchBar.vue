@@ -3,7 +3,7 @@
       <br>
       <v-flex style="display: inline-flex">
         <v-text-field v-model="searchValue" solo label="Search product" style="width: 500px"/>
-        <v-btn style="float: left;">Search</v-btn>
+        <v-btn style="float: left;" @click="">Search</v-btn>
       </v-flex>
     </v-form>
 </template>
@@ -17,20 +17,6 @@
             searchValue: ''
           }
       },
-      methods: {
-          searchByName() {
-            axios.get('http://localhost:8080/products/all', {
-              headers: {
-                // "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
-                "Content-type": 'application/json'
-              }
-            }).then(response => {
-              this.products = response.data;
-            }).catch(
-              () => console.log("Cannot found any result!")
-            )
-          }
-      }
     }
 </script>
 
