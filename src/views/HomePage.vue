@@ -9,6 +9,12 @@
     </v-form>
 
     <div>
+      <v-select :items="sortOption"
+                item-text="name"
+                item-value="sort"
+                class="col-md-2 ml-auto" label="Sort" v-model="pagination.sort" v-on:change="readAllProduct">
+
+      </v-select>
       <v-container>
         <v-data-iterator :items="products" content-tag="v-layout"
                          row wrap :rows-per-page-items="rowsPerPageItems" hide-actions>
@@ -65,11 +71,41 @@
         products: [],
         searchValue: '',
         rowsPerPageItems: [4, 8, 12],
+        sortOption: [
+          {
+            name: 'A - Z',
+            sort: {
+              field: 'name',
+              order: 'ASC'
+            }
+          },
+          {
+            name: 'Z - A',
+            sort: {
+              field: 'name',
+              order: 'DESC'
+            }
+          },
+          {
+            name: 'Lowest price',
+            sort: {
+              field: 'price',
+              order: 'ASC'
+            }
+          },
+          {
+            name: 'Highest price',
+            sort: {
+              field: 'price',
+              order: 'DESC'
+            }
+          }
+        ],
         pagination: {
           page: 0,
           size: 8,
           sort: {
-            field: 'id',
+            field: 'name',
             order: 'ASC',
           },
           length: 6,
@@ -123,6 +159,9 @@
       this.readAllProduct('');
     },
     methods: {
+      sort() {
+
+      },
       clickCard(item) {
         // alert("click card " + item.name);
       },
