@@ -6,13 +6,17 @@
       </b-navbar-brand>
       <b-navbar-nav>
         <b-nav-item>
-
+          <router-link to="/admin" class="link-color">Admin</router-link>
         </b-nav-item>
       </b-navbar-nav>
 
       <b-navbar-nav class="ml-auto">
         <b-nav-item v-if="this.haveToken == false" @click="goLogin">
           Login
+        </b-nav-item>
+
+        <b-nav-item v-if="this.haveToken == false" @click="goRegister">
+          Register
         </b-nav-item>
 
         <b-nav-item v-if="this.haveToken == true" @click="signout">Sign out</b-nav-item>
@@ -35,6 +39,9 @@
           this.tokenExist();
       },
       methods: {
+          goRegister() {
+            this.$router.push("/register")
+          },
           goLogin() {
             this.$router.push("/login")
           },
