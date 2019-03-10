@@ -36,14 +36,19 @@
                           class="justify-center m-sm-5">
                 </v-select>
               </v-flex>
+
               <v-flex xs6>
-                <v-textarea max-height="100px" v-model="newProduct.description" label="Description"
-                            class="justify-center m-sm-5"/>
+                <b-form-file v-model="file" ref="fileInput" accept="image/*" multiple placeholder="Product Image"/>
+                <v-btn color="info"  flat small outline @click="clearFile">Reset image</v-btn>
+              </v-flex>
+              <v-flex xs12>
+                <v-textarea v-model="newProduct.description" label="Description" outline auto-grow
+                            class="justify-center m-sm-5 mh-100"/>
               </v-flex>
             </v-layout>
           </v-container>
 
-          <v-btn @click="createProduct" color="primary">Create</v-btn>
+          <v-btn @click="createProduct" color="primary" type="submit">Create</v-btn>
           <v-btn color="error" @click="dialog = false">Cancel</v-btn>
         </v-form>
       </v-card>
@@ -56,6 +61,10 @@
       <template slot="items" slot-scope="props" style="width: fit-content">
         <tr>
           <td>{{props.item.id}}</td>
+          <td>
+            <img v-bind:src="props.item.imgURL" v-if="props.item.imgURL != ''" height="200" width="200"/>
+            <img src="../assets/no-image.png" v-if="props.item.imgURL == ''" width="200" height="200">
+          </td>
           <td>{{props.item.name}}</td>
           <td>{{props.item.price}}</td>
           <td>{{props.item.quantity}}</td>
@@ -108,9 +117,9 @@
                           class="justify-center m-sm-5">
                 </v-select>
               </v-flex>
-              <v-flex xs6>
-                <v-textarea max-height="100px" v-model="updatedProduct.description" label="Description"
-                            class="justify-center m-sm-5"/>
+              <v-flex xs12>
+                <v-textarea v-model="updatedProduct.description" label="Description" outline auto-grow
+                            class="justify-center m-sm-5 mh-100"/>
               </v-flex>
             </v-layout>
           </v-container>
@@ -130,6 +139,7 @@
     name: "ManageProduct",
     data() {
       return {
+        file: null,
         enableUpdate: false,
         selectedItem: null,
         updatedProduct: {},
@@ -138,6 +148,7 @@
           price: 0,
           quantity: 0,
           description: '',
+          imgURL: '',
           category: null,
           supplier: null,
         },
@@ -152,6 +163,11 @@
             sortable: true,
             align: 'center',
             value: "id"
+          },
+          {
+            text: "Image",
+            align: 'center',
+            value: "name"
           },
           {
             text: "Name",
@@ -203,16 +219,17 @@
     },
 
     created: function () {
-      // this.categories.push({text: String(phone)})
       this.readAllSupplier();
       this.readAllProduct();
       this.readAllCategory();
     },
 
     methods: {
+      clearFile() {
+        this.$refs.fileInput.reset();
+      },
 
       readAllSupplier() {
-        console.log("Reading all suppliers ...")
         axios.get('http://localhost:8080/suppliers', {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
@@ -226,7 +243,6 @@
       },
 
       readAllCategory() {
-        console.log("Reading all categories ...")
         axios.get('http://localhost:8080/categories', {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
@@ -254,19 +270,73 @@
       },
 
 
+      // createProduct() {
+      //   console.log(this.newProduct.image);
+      //   axios.post("http://localhost:8080/products", this.newProduct, {
+      //     headers: {
+      //       "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
+      //       "Content-type": 'application/json'
+      //     }
+      //   }).then(
+      //     res => {
+      //       this.products = [];
+      //       this.readAllProduct();
+      //       this.dialog = false;
+      //     }
+      //   )
+      // },
+      // createProduct() {
+      //   this.newProduct.image = this.newProduct.image[0];
+      //   console.log(this.newProduct.image);
+      //   console.log(this.newProduct.category);
+      //   console.log(this.newProduct.supplier);
+      //   let formData = new FormData();
+      //   formData.append('newProduct', this.newProduct)
+      //   formData.append('category', this.newProduct.category)
+      //   formData.append('supplier',this.newProduct.supplier)
+      //   axios.post("http://localhost:8080/products", formData, {
+      //     headers: {
+      //       "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
+      //       "Content-type": 'multipart/form-data',
+      //       'boundary': 'XXX'
+      //     }
+      //   }).then(
+      //     res => {
+      //       this.products = [];
+      //       this.readAllProduct();
+      //       this.dialog = false;
+      //     }
+      //   )
+      // },
+
       createProduct() {
-        axios.post("http://localhost:8080/products", this.newProduct, {
+        this.file = this.file[0];
+        let formData = new FormData();
+        formData.append('file', this.file);
+        axios.post("http://localhost:8080/products/image", formData, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
-            "Content-type": 'application/json'
+            "Content-type": 'multipart/form-data',
+            'boundary': 'XXX'
           }
-        }).then(
-          res => {
-            this.products = [];
-            this.readAllProduct();
-            this.dialog = false;
-          }
-        )
+        }).then(res => {
+          // console.log(res.data);
+          this.newProduct.imgURL = '' + res.data;
+          console.log(this.newProduct.imgURL);
+          console.log(this.newProduct);
+          axios.post("http://localhost:8080/products", this.newProduct, {
+            headers: {
+              "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
+              "Content-type": 'application/json'
+            }
+          }).then(
+            response => {
+              this.products = [];
+              this.readAllProduct();
+              this.dialog = false;
+            }
+          )
+        })
       },
 
       updateProduct(item) {
@@ -293,7 +363,6 @@
             }
           }).then(
             res => {
-              console.log(res)
               this.products = [];
               this.readAllProduct();
             }

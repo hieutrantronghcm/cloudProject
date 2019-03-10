@@ -2,10 +2,11 @@
   <div>
     <v-form>
       <br>
-      <v-flex style="display: inline-flex">
+      <v-flex style="display: inline-flex" class="xs6">
         <v-text-field v-model="searchValue" solo label="Search product" style="width: 500px"/>
         <v-btn style="float: left;" @click="search">Search</v-btn>
       </v-flex>
+
     </v-form>
 
     <div>
@@ -21,6 +22,8 @@
           <template v-slot:item="props">
             <v-flex xs12 sm6 md4 lg3>
               <v-card class="m-4 clickable" @click="clickCard(props.item)">
+                <img v-bind:src="props.item.imgURL" width="200" height="200" v-if="props.item.imgURL != ''"/>
+                <img src="../assets/no-image.png" v-if="props.item.imgURL == ''" width="200" height="200">
                 <v-card-title style="color: #2196F3">
                   <h3>{{props.item.name}}</h3>
                 </v-card-title>
@@ -87,14 +90,14 @@
             }
           },
           {
-            name: 'Lowest price',
+            name: 'Lowest Price',
             sort: {
               field: 'price',
               order: 'ASC'
             }
           },
           {
-            name: 'Highest price',
+            name: 'Highest Price',
             sort: {
               field: 'price',
               order: 'DESC'
@@ -110,48 +113,6 @@
           },
           length: 6,
         },
-        items: [
-          {
-            name: 'Frozen Yogurt',
-            calories: 159,
-            fat: 6.0,
-            carbs: 24,
-            protein: 4.0,
-            sodium: 87,
-            calcium: '14%',
-            iron: '1%'
-          },
-          {
-            name: 'Ice cream sandwich',
-            calories: 237,
-            fat: 9.0,
-            carbs: 37,
-            protein: 4.3,
-            sodium: 129,
-            calcium: '8%',
-            iron: '1%'
-          },
-          {
-            name: 'Eclair',
-            calories: 262,
-            fat: 16.0,
-            carbs: 23,
-            protein: 6.0,
-            sodium: 337,
-            calcium: '6%',
-            iron: '7%'
-          },
-          {
-            name: 'Cupcake',
-            calories: 305,
-            fat: 3.7,
-            carbs: 67,
-            protein: 4.3,
-            sodium: 413,
-            calcium: '3%',
-            iron: '8%'
-          }
-        ]
       }
     },
     created: function () {
@@ -175,7 +136,6 @@
       },
 
       readAllProduct() {
-        console.log("Reading all products ...")
         var url = 'http://localhost:8080/products?' +
           'page=' + (this.pagination.page - 1) + '&' +
           'size=' + this.pagination.size + '&' +
@@ -191,8 +151,6 @@
           this.products = data.content;
           this.pagination.page = data.pageable.pageNumber + 1;
           this.pagination.length = data.totalPages;
-
-          console.log(data);
         }).catch(
           () => console.log("Cannot found any result!")
         )
