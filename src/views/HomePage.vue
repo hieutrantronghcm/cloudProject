@@ -9,7 +9,7 @@
 
     </v-form>
 
-    <div>
+    <div v-if="flag.searching == true">
       <v-select :items="sortOption"
                 item-text="name"
                 item-value="sort"
@@ -43,9 +43,6 @@
                     <v-list-tile-content class="align-end">{{props.item.supplier.name}}</v-list-tile-content>
                   </v-list-tile>
                 </v-list>
-                <v-card-actions>
-                  <v-btn class="mx-auto" color="error" @click="buyItem">Buy</v-btn>
-                </v-card-actions>
               </v-card>
             </v-flex>
           </template>
@@ -55,6 +52,60 @@
                     @next="readAllProduct" @input="readAllProduct" @previous="readAllProduct">
 
       </v-pagination>
+    </div>
+
+    <div v-if="flag.viewDetail == true">
+      <v-container grid-list-md>
+        <v-layout row wrap>
+          <v-flex xs6>
+            <v-card flat class="h-100">
+              <img class="my-4" v-bind:src="productDetail.imgURL" v-if="productDetail.imgURL != ''"/>
+              <img src="../assets/no-image.png" v-if="productDetail.imgURL == ''"/>
+            </v-card>
+          </v-flex>
+
+          <v-flex xs6>
+            <v-card flat class="h-100">
+              <v-card-title style="color: #2196F3">
+                <h2>{{productDetail.name}}</h2>
+              </v-card-title>
+              <v-divider></v-divider>
+              <v-list dense>
+                <v-list-tile>
+                  <v-list-tile-content>Price:</v-list-tile-content>
+                  <v-list-tile-content class="align-end" style="font-size: 24px">${{productDetail.price}}</v-list-tile-content>
+                </v-list-tile>
+                <v-list-tile>
+                  <v-list-tile-content>Category:</v-list-tile-content>
+                  <v-list-tile-content class="align-end">{{productDetail.category.name}}</v-list-tile-content>
+                </v-list-tile>
+                <v-list-tile>
+                  <v-list-tile-content>Supplier:</v-list-tile-content>
+                  <v-list-tile-content class="align-end">{{productDetail.supplier.name}}</v-list-tile-content>
+                </v-list-tile>
+              </v-list>
+
+              <v-layout class="mb-3">
+                <v-flex xs6 class="px-4">
+                  <b-form-input class="h-100" type="number" min="1" v-bind:max="productDetail.quantity" v-model="counter" />
+                </v-flex>
+                <v-flex xs6>
+                  <v-btn class="mx-auto w-75" large color="error" @click="buyItem">Buy</v-btn>
+                </v-flex>
+              </v-layout>
+            </v-card>
+          </v-flex>
+
+          <v-flex xs12>
+            <v-card flat>
+              <v-card-title>
+                <h3>Description:</h3>
+              </v-card-title>
+              <v-card-text class="text-justify">{{productDetail.description}}</v-card-text>
+            </v-card>
+          </v-flex>
+        </v-layout>
+      </v-container>
     </div>
 
   </div>
@@ -71,7 +122,17 @@
     },
     data() {
       return {
+        counter: 1,
         products: [],
+        flag: {
+          searching: true,
+          viewDetail: false,
+          viewCart: false,
+          viewPayment: false,
+        },
+        productDetail: {
+
+        },
         searchValue: '',
         rowsPerPageItems: [4, 8, 12],
         sortOption: [
@@ -123,14 +184,31 @@
       sort() {
 
       },
+      increaseQuantity() {
+        this.counter++;
+      },
+      decreaseQuantity() {
+        this.counter--;
+      },
+      resetFlag() {
+        this.flag.searching = false;
+        this.flag.viewDetail = false;
+        this.flag.viewCart = false;
+        this.flag.viewPayment = false;
+      },
       clickCard(item) {
         // alert("click card " + item.name);
+        this.resetFlag();
+        this.flag.viewDetail = true;
+        this.productDetail = item;
       },
       buyItem() {
         alert("Buy")
       },
 
       search() {
+        this.resetFlag();
+        this.flag.searching = true;
         this.pagination.page = 1;
         this.readAllProduct();
       },
