@@ -1,4 +1,4 @@
-<template>
+<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
   <div>
     <b-navbar type="dark" variant="info">
       <b-navbar-brand>
@@ -19,6 +19,19 @@
           Register
         </b-nav-item>
 
+
+        <b-nav-item v-if="this.haveToken == true" @click="goCart" class="mr-5">
+          <img src="../assets/shopping-cart.png" height="20px" width="20px"/>
+          Cart
+          <v-badge color="#FDD835">
+            <template v-slot:badge>
+                <span style="color: black; font-weight: bold">
+                  {{cartItemQuantity}}</span>
+            </template>
+          </v-badge>
+        </b-nav-item>
+
+
         <b-nav-item v-if="this.haveToken == true" @click="signout">Sign out</b-nav-item>
 
       </b-navbar-nav>
@@ -28,43 +41,57 @@
 </template>
 
 <script>
-    export default {
-        name: "Default",
-      data() {
-          return {
-            haveToken: false,
-        }
+  import {mapState, mapActions} from 'vuex';
+
+  export default {
+    name: "Default",
+    data() {
+      return {
+        haveToken: false,
+      }
+    },
+    created: function () {
+      this.tokenExist();
+      this.getTotalItemInCart();
+    },
+    computed: {
+      ...mapState({
+        cartItemQuantity: state => state.cartItemQuantity
+      }),
+
+    },
+    methods: {
+      getTotalItemInCart() {
+        this.$store.dispatch('getTotalItemInCart');
       },
-      created: function() {
-          this.tokenExist();
+      goRegister() {
+        this.$router.push("/register")
       },
-      methods: {
-          goRegister() {
-            this.$router.push("/register")
-          },
-          goLogin() {
-            this.$router.push("/login")
-          },
-        goHome() {
-          this.$router.go();
-        },
-          tokenExist() {
-            if (localStorage.getItem("cdpmToken") !== null) {
-              // console.log("co token");
-              this.haveToken = true;
-            }
-            else {
-              // console.log("ko co token");
-              this.haveToken = false;
-            }
-          },
-        signout() {
-          localStorage.removeItem("cdpmToken");
+      goLogin() {
+        this.$router.push("/login")
+      },
+      goCart() {
+        this.$root.$emit('view-cart');
+      },
+      goHome() {
+        this.$router.go();
+      },
+      tokenExist() {
+        if (localStorage.getItem("cdpmToken") !== null) {
+          // console.log("co token");
+          this.haveToken = true;
+        } else {
+          // console.log("ko co token");
           this.haveToken = false;
-          this.$router.push("/login")
         }
+      },
+      signout() {
+        localStorage.removeItem("cdpmToken");
+        this.haveToken = false;
+        this.$router.push("/login")
       }
     }
+  }
 </script>
 
 <style scoped>

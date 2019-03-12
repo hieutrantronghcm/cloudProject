@@ -1,5 +1,13 @@
-<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
-  <div>
+<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform" @view-your-cart="viewCart">
+  <div style="background-color: #F4F4F4">
+    <v-carousel>
+      <v-carousel-item
+        v-for="(item,i) in items"
+        :key="i">
+        <!--:src="item.src"-->
+        <img :src="item.src" class="img-fluid" style="width: 100%"/>
+      </v-carousel-item>
+    </v-carousel>
     <v-form>
       <br>
       <v-flex style="display: inline-flex" class="xs6">
@@ -32,7 +40,8 @@
                 <v-list dense>
                   <v-list-tile>
                     <v-list-tile-content>Price:</v-list-tile-content>
-                    <v-list-tile-content class="align-end" style="font-size: 24px">${{props.item.price}}</v-list-tile-content>
+                    <v-list-tile-content class="align-end" style="font-size: 24px">${{props.item.price}}
+                    </v-list-tile-content>
                   </v-list-tile>
                   <v-list-tile>
                     <v-list-tile-content>Category:</v-list-tile-content>
@@ -73,7 +82,8 @@
               <v-list dense>
                 <v-list-tile>
                   <v-list-tile-content>Price:</v-list-tile-content>
-                  <v-list-tile-content class="align-end" style="font-size: 24px">${{productDetail.price}}</v-list-tile-content>
+                  <v-list-tile-content class="align-end" style="font-size: 24px">${{productDetail.price}}
+                  </v-list-tile-content>
                 </v-list-tile>
                 <v-list-tile>
                   <v-list-tile-content>Category:</v-list-tile-content>
@@ -87,10 +97,11 @@
 
               <v-layout class="mb-3">
                 <v-flex xs6 class="px-4">
-                  <b-form-input class="h-100" type="number" min="1" v-bind:max="productDetail.quantity" v-model="counter" />
+                  <b-form-input class="h-100" type="number" min="1" v-bind:max="productDetail.quantity"
+                                v-model="selectedQuantity"/>
                 </v-flex>
                 <v-flex xs6>
-                  <v-btn class="mx-auto w-75" large color="error" @click="buyItem">Buy</v-btn>
+                  <v-btn class="mx-auto w-75" large color="error" @click="buyItem(productDetail)">Buy</v-btn>
                 </v-flex>
               </v-layout>
             </v-card>
@@ -108,6 +119,94 @@
       </v-container>
     </div>
 
+    <div v-if="flag.viewCart == true">
+      <v-container>
+        <v-layout>
+          <v-flex md9 class="mr-3">
+            <v-data-iterator :items="carts"
+                             :rows-per-page-items="rowsPerPageItems" hide-actions>
+              <template v-slot:item="props">
+                <v-card flat="" class="mb-3">
+                  <v-card-text>
+                    <v-layout row>
+                      <v-card style="background-color: white; height: 150px; width: 100px" flat>
+                        <v-card-text>
+                          <img class="img-fluid" v-bind:src="props.item.product.imgURL"
+                               v-if="props.item.product.imgURL != ''"/>
+                          <img class="img-fluid" src="../assets/no-image.png"
+                               v-if="props.item.product.imgURL == ''" >
+                        </v-card-text>
+                      </v-card>
+
+                      <v-flex d-flex>
+                        <v-card style="background-color: white" flat>
+                          <v-card-text>
+                            <v-layout row>
+                              <v-card lable="white pink" style="width: 480px" flat>
+                                <v-layout column>
+                                  <v-card style="background-color: white" flat>
+                                    <v-card-title>
+                                      <h4 class="text-left text-wrap clickable" @click="clickCard(props.item.product)">
+                                        {{props.item.product.name}}
+                                      </h4>
+                                    </v-card-title>
+                                  </v-card>
+                                  <v-card style="background-color: white" flat>
+                                    <v-card-title>
+                                      <a href="#" @click="removeItem(props.item)" style="font-size: 12px">Remove</a>
+                                    </v-card-title>
+                                  </v-card>
+                                </v-layout>
+                              </v-card>
+                              <v-card style="background-color: white" flat width="83px">
+                                <v-card-text style="font-size: 18px; font-weight: bold">
+                                  ${{props.item.product.price}}
+                                </v-card-text>
+                              </v-card>
+                              <v-card style="background-color: white" width="155px" flat>
+                                <v-card-text>
+                                  <b-form-input
+                                                type="number"
+                                                min="1"
+                                                v-bind:max="productDetail.quantity"
+                                                v-model="props.item.quantity" v-on:change="changeQuantity"/>
+                                </v-card-text>
+                              </v-card>
+                            </v-layout>
+                          </v-card-text>
+                        </v-card>
+                      </v-flex>
+                    </v-layout>
+                  </v-card-text>
+                </v-card>
+              </template>
+            </v-data-iterator>
+          </v-flex>
+
+          <v-flex md3>
+            <v-layout class="ml-1" column wrap>
+              <v-flex>
+                <v-card flat>
+                  <v-card-title>
+                    Total Cash: <h2 class="ml-auto" style="color: #ff253a">${{totalPay}}</h2>
+                  </v-card-title>
+                </v-card>
+                <v-card class="mt-2" flat>
+                  <v-btn color="error" block>Check Out</v-btn>
+                </v-card>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+
+
+        </v-layout>
+      </v-container>
+    </div>
+
+    <v-snackbar v-model="snackbar" top timeout="2000">
+      {{snackbarText}}
+      <v-btn flat color="pink" @click="snackbar = false">Close</v-btn>
+    </v-snackbar>
   </div>
 </template>
 
@@ -122,7 +221,32 @@
     },
     data() {
       return {
-        counter: 1,
+        snackbarText: '',
+        snackbar: false,
+        items: [
+          {
+            src: 'https://i1.wp.com/www.inventiva.co.in/wp-content/uploads/2018/07/samsung-banners.png?fit=1000%2C450&ssl=1'
+          },
+          {
+            src: 'https://cdn-media.placewellretail.com/media/catalog/category/Sony_Banner.jpg'
+          },
+          {
+            src: 'https://www.techwelike.com/wp-content/uploads/2013/10/Google-Nexus-5-Android-Smartphone-at-Google-Play-Store-banner.png'
+          },
+          {
+            src: 'https://pro2-bar-s3-cdn-cf3.myportfolio.com/76419d26711f3631d7bfdf4358c946ad/ebf28c899c6848a46d4f3f34_rw_1200.png?h=ae5460bebf1164dd59334ac5f72a1977'
+          },
+          {
+            src: 'https://www.lg.com/ae/images/MC/features/V30_Hero-Banner-D_new1_DR.jpg',
+          }
+        ],
+        selectedQuantity: 1,
+        totalPay: 0,
+        carts: [],
+        cart: {
+          product: null,
+          quantity: 1
+        },
         products: [],
         flag: {
           searching: true,
@@ -130,9 +254,7 @@
           viewCart: false,
           viewPayment: false,
         },
-        productDetail: {
-
-        },
+        productDetail: {},
         searchValue: '',
         rowsPerPageItems: [4, 8, 12],
         sortOption: [
@@ -176,19 +298,52 @@
         },
       }
     },
+    mounted: function () {
+      this.$root.$on('view-cart', () => {
+        this.viewCart();
+      })
+    },
     created: function () {
       this.searchValue = '';
       this.readAllProduct('');
+      if (localStorage.getItem("cart") != null) {
+        this.carts = JSON.parse(localStorage.getItem("cart"));
+      }
     },
     methods: {
-      sort() {
-
+      getTotalItemInCart() {
+        this.$store.dispatch('getTotalItemInCart');
       },
-      increaseQuantity() {
-        this.counter++;
+      removeItem(cart) {
+        for (let i = 0; i < this.carts.length; i++) {
+          if (this.carts[i].product.id == cart.product.id) {
+            this.carts.splice(i, 1);
+            break;
+          }
+        }
+        this.totalCash();
+        localStorage.setItem("cart", JSON.stringify(this.carts));
+        this.getTotalItemInCart();
+        this.snackbarText = "Removed Product";
+        this.snackbar = true;
       },
-      decreaseQuantity() {
-        this.counter--;
+      changeQuantity() {
+        this.totalCash();
+        localStorage.setItem("cart", JSON.stringify(this.carts));
+        this.getTotalItemInCart();
+        this.snackbarText = "Changed Quantity";
+        this.snackbar = true;
+      },
+      totalCash() {
+        this.totalPay = 0;
+        for (var i = 0; i < this.carts.length; i++) {
+          this.totalPay += this.carts[i].product.price * this.carts[i].quantity;
+        }
+      },
+      viewCart() {
+        this.resetFlag();
+        this.flag.viewCart = true;
+        this.totalCash();
       },
       resetFlag() {
         this.flag.searching = false;
@@ -197,13 +352,28 @@
         this.flag.viewPayment = false;
       },
       clickCard(item) {
-        // alert("click card " + item.name);
         this.resetFlag();
         this.flag.viewDetail = true;
         this.productDetail = item;
       },
-      buyItem() {
-        alert("Buy")
+      buyItem(product) {
+        let existedProduct = false;
+        for (let i = 0; i < this.carts.length; i++) {
+          if (this.carts[i].product.id == product.id) {
+            this.carts[i].quantity = parseInt(this.carts[i].quantity, 10) + parseInt(this.selectedQuantity, 10);
+            existedProduct = true;
+          }
+        }
+        if (existedProduct == false) {
+          this.cart.quantity = parseInt(this.selectedQuantity, 10);
+          this.cart.product = product;
+          this.carts.push(this.cart)
+        }
+        this.selectedQuantity = 1;
+        localStorage.setItem("cart", JSON.stringify(this.carts));
+        this.getTotalItemInCart();
+        this.snackbarText = "Added Product";
+        this.snackbar = true;
       },
 
       search() {
@@ -240,5 +410,8 @@
 <style scoped>
   .clickable {
     cursor: pointer;
+  }
+  h4:hover{
+    color: #2196F3;
   }
 </style>

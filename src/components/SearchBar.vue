@@ -3,7 +3,7 @@
       <br>
       <v-flex style="display: inline-flex">
         <v-text-field v-model="searchValue" solo label="Search product" style="width: 500px"/>
-        <v-btn style="float: left;" @click="">Search</v-btn>
+        <v-btn style="float: left;">Search</v-btn>
       </v-flex>
     </v-form>
 </template>

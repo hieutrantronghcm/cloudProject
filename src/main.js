@@ -4,6 +4,8 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import Vuetify from 'vuetify'
+import Vuex from 'vuex'
+import store from './components/store/shopping-cart'
 import 'vuetify/dist/vuetify.min.css'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
@@ -42,6 +44,7 @@ Vue.use(Vuetify, {
 
 Vue.use(BootstrapVue)
 Vue.use(VueIcon, 'v-icon')
+Vue.use(Vuex)
 
 /* eslint-disable no-new */
 // new Vue({
@@ -52,5 +55,6 @@ Vue.use(VueIcon, 'v-icon')
 // })
 new Vue({
   router,
+  store,
   render: h => h(App)
 }).$mount('#app')
