@@ -1,10 +1,9 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform" @view-your-cart="viewCart">
   <div style="background-color: #F4F4F4">
-    <v-carousel>
+    <v-carousel v-if="flag.searching == true">
       <v-carousel-item
         v-for="(item,i) in items"
         :key="i">
-        <!--:src="item.src"-->
         <img :src="item.src" class="img-fluid" style="width: 100%"/>
       </v-carousel-item>
     </v-carousel>
@@ -192,7 +191,7 @@
                   </v-card-title>
                 </v-card>
                 <v-card class="mt-2" flat>
-                  <v-btn color="error" block>Check Out</v-btn>
+                  <v-btn color="error" block @click="checkOut" :loading="loading">Check Out</v-btn>
                 </v-card>
               </v-flex>
             </v-layout>
@@ -203,7 +202,27 @@
       </v-container>
     </div>
 
-    <v-snackbar v-model="snackbar" top timeout="2000">
+    <v-dialog v-model="flag.viewPayment" max-width="400px">
+      <v-card>
+        <div style="background-color: #26FF79; width: 100%; height: 150px">
+          <v-img src="https://www.studentvip.ca/content/school/widget/large/large_widget_be1f701b-a146-485c-9ca8-5421a959705e.png"
+                 width="90px" height="90px" class="mx-auto" style="top: 20%;"/>
+        </div>
+
+        <!--<v-divider></v-divider>-->
+
+        <v-card-title>
+          <h5 class="mx-auto" style="font-weight: bold">Pay Success!</h5>
+        </v-card-title>
+
+        <v-card-text>your payment is success</v-card-text>
+        <v-card-actions>
+          <v-btn @click="flag.viewPayment = false" color="primary" class="mx-auto">Ok</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-snackbar v-model="snackbar" top :timeout="2000">
       {{snackbarText}}
       <v-btn flat color="pink" @click="snackbar = false">Close</v-btn>
     </v-snackbar>
@@ -221,6 +240,7 @@
     },
     data() {
       return {
+        loading: false,
         snackbarText: '',
         snackbar: false,
         items: [
@@ -311,6 +331,30 @@
       }
     },
     methods: {
+      deleteCart() {
+        this.carts = [];
+        localStorage.removeItem("cart");
+        this.totalCash();
+        this.getTotalItemInCart();
+      },
+      checkOut() {
+        if(localStorage.getItem("cart") != null) {
+          this.loading = true;
+          setTimeout(() => (
+            this.loading = false,
+              axios.post("http://localhost:8080/payments", this.carts, {
+                headers: {
+                  "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
+                  "Content-type": 'application/json'
+                }
+              })
+                .then(res => {
+                  this.flag.viewPayment = true;
+                  this.deleteCart();
+                })
+          ), 1000);
+        }
+      },
       getTotalItemInCart() {
         this.$store.dispatch('getTotalItemInCart');
       },
