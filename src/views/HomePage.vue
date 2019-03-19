@@ -29,7 +29,7 @@
           <template v-slot:item="props">
             <v-flex xs12 sm6 md4 lg3>
               <v-card class="m-4 clickable" @click="clickCard(props.item)">
-                <img v-bind:src="props.item.imgURL" width="200" height="200" v-if="props.item.imgURL != ''"/>
+                <img v-bind:src="props.item.imgURL" height="200" v-if="props.item.imgURL != ''"/>
                 <img src="../assets/no-image.png" v-if="props.item.imgURL == ''" width="200" height="200">
                 <v-card-title style="color: #2196F3">
                   <h3>{{props.item.name}}</h3>
@@ -67,7 +67,7 @@
         <v-layout row wrap>
           <v-flex xs6>
             <v-card flat class="h-100">
-              <img class="my-4" v-bind:src="productDetail.imgURL" v-if="productDetail.imgURL != ''"/>
+              <img class="my-4" v-bind:src="productDetail.imgURL" height="300" v-if="productDetail.imgURL != ''"/>
               <img src="../assets/no-image.png" v-if="productDetail.imgURL == ''"/>
             </v-card>
           </v-flex>
@@ -97,7 +97,7 @@
               <v-layout class="mb-3">
                 <v-flex xs6 class="px-4">
                   <b-form-input class="h-100" type="number" min="1" v-bind:max="productDetail.quantity"
-                                v-model="selectedQuantity"/>
+                                v-model="selectedQuantity" v-on:error="getErrorQuantityMsg"/>
                 </v-flex>
                 <v-flex xs6>
                   <v-btn class="mx-auto w-75" large color="error" @click="buyItem(productDetail)">Buy</v-btn>
@@ -331,6 +331,9 @@
       }
     },
     methods: {
+      getErrorQuantityMsg() {
+        alert("Error")
+      },
       deleteCart() {
         this.carts = [];
         localStorage.removeItem("cart");
@@ -349,8 +352,12 @@
                 }
               })
                 .then(res => {
-                  this.flag.viewPayment = true;
-                  this.deleteCart();
+                  if(res.data != "Quantity Exceed"){
+                    this.flag.viewPayment = true;
+                    this.deleteCart();
+                  } else {
+                    alert("Your quantity of product is invalid")
+                  }
                 })
           ), 1000);
         }

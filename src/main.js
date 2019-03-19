@@ -14,6 +14,8 @@ import VueIcon from 'vue-icon'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import '@fortawesome/fontawesome-free/css/all.css'
 import '@mdi/font/css/materialdesignicons.css'
+import VueDebounce from 'vue-debounce'
+import LodashDebounce from 'lodash.debounce'
 
 import Default from "./components/Default";
 import DashBoard from "./components/DashBoard";
@@ -24,7 +26,10 @@ Vue.component('no-layout', )
 
 Vue.config.productionTip = false
 
-// Vue.use(Vuetify)
+Vue.use(VueDebounce,{
+listenTo: 'oninput'
+})
+Vue.use(LodashDebounce)
 Vue.use(Vuetify, {
   iconfont: [
     'mdi',

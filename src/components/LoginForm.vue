@@ -42,11 +42,11 @@
           response => {
             console.log("cdpmToken : " + response.data.token);
             localStorage.setItem("cdpmToken", response.data.token);
-            this.$router.push('/admin');
+            this.$router.push('/');
           }
         ).catch(
-          () => {
-            console.log(localStorage.getItem("cdpmToken"));
+          (error) => {
+            console.log(error.response.data);
             localStorage.removeItem("cdpmToken");
           }
         )

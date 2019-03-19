@@ -1,12 +1,12 @@
 <template>
   <div>
-    <h2>Supplier Page</h2>
+    <!--<h2>Supplier Page</h2>-->
     <v-btn color="success" small class="right" @click="dialog = true">New Supplier</v-btn>
 
     <v-dialog v-model="dialog" max-width="1000px">
       <v-card>
         <v-card-title>
-          <h2>Create new product</h2>
+          <h2>Add new supplier</h2>
         </v-card-title>
         <v-form>
           <v-container>
@@ -58,7 +58,7 @@
     <v-dialog v-model="enableUpdate" max-width="1000px">
       <v-card>
         <v-card-title>
-          <h2>Update Product</h2>
+          <h2>Update Supplier</h2>
         </v-card-title>
         <v-form>
           <v-container>

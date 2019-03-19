@@ -7,14 +7,19 @@
             Register Page
           </v-label>
         </h2>
-        <v-text-field v-model="account.username" label="Username"></v-text-field>
-        <v-text-field v-model="account.password" label="Password" :type="'password'"></v-text-field>
-        <v-text-field ref="repass" label="Re-enter password" :type="'password'"></v-text-field>
-        <v-text-field v-model="account.email" :type="'email'" label="Email"></v-text-field>
-        <v-select :items="role" item-text="name" item-value="value" v-model="account.role" label="Role">
-        </v-select>
-        <v-btn @click="register" color="success">Register</v-btn>
-        <v-btn color="info" @click="goHome">Home</v-btn>
+        <v-form @submit.prevent="register">
+          <v-text-field :rules="[rules.usernameRequired]" v-model="account.username" label="Username">
+          </v-text-field>
+
+          <v-text-field :rules="[rules.passwordRequired]" v-model="account.password" label="Password" :type="'password'"></v-text-field>
+
+          <v-text-field :rules="[rules.mismatchPassword, rules.passwordRequired]" ref="repass" label="Re-enter password" :type="'password'">
+          </v-text-field>
+
+          <v-text-field v-model="account.email" :type="'email'" label="Email"></v-text-field>
+          <v-btn type="submit" color="success">Register</v-btn>
+          <v-btn color="info" @click="goHome">Home</v-btn>
+        </v-form>
       </v-flex>
     </v-container>
   </div>
@@ -22,6 +27,7 @@
 
 <script>
   import axios from 'axios';
+  import _ from 'lodash.debounce';
   export default {
     name: "RegisterForm",
     data() {
@@ -32,16 +38,19 @@
           email: '',
           role: '',
         },
-        role:[
-          {
-            name: 'Admin',
-            value: 'ADMIN'
-          },
-          {
-            name: 'Customer',
-            value: 'CUSTOMER',
-          }
-        ]
+        isUsernameExisted: false,
+
+        rules: {
+          usernameRequired: username => !!username || "Username required !!",
+          usernameExisted: username => !this.isUsernameExisted || "Username existed!!",
+          passwordRequired: password => !!password || "Password required !!",
+          mismatchPassword: password => this.account.password == password || "Password not match !!"
+        }
+      }
+    },
+    watch: {
+      isUsernameExisted: function() {
+        this.checkUsernameExist();
       }
     },
 
@@ -49,15 +58,35 @@
       goHome() {
         this.$router.push('/');
       },
+      checkUsernameExist() {
 
-      register() {
-        console.log(this.account);
-        axios.post('http://localhost:8080/users', this.account
-        ).then(
-          response => {
-            this.$router.push('/login');
+        return axios.get('http://localhost:8080/users/check?username=' + this.account.username, {
+          headers: {
+            "Access-Control-Allow-Origin": "*"
+          }
+        })
+          .then(res => {
+            console.log(res.data)
+            console.log(typeof res.data);
+            this.isUsernameExisted = res.data;
+            console.log(this.isUsernameExisted + " - " + this.account.username)
+            return res.data;
+          }).catch(
+          error => {
+            console.log("Cannot found any result!");
           }
         )
+      },
+
+      register() {
+        axios.post('http://localhost:8080/users', this.account
+        ).then(response => {
+            console.log(res);
+            this.$router.push('/login');
+          }
+        ).catch(error => {
+          alert(error.response.data.message);
+        })
       }
     }
   }
