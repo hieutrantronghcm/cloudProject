@@ -9,7 +9,7 @@
         </v-card-title>
         <v-form>
           <v-text-field v-model="newCategory.name" placeholder="Name" class="justify-center m-sm-5"/>
-          <v-btn flat color="primary" @click="createCategory">Create</v-btn>
+          <v-btn flat color="primary" @click="createCategory" :loading="createLoading">Create</v-btn>
 
           <v-btn color="error" flat @click="dialog = false">Cancel</v-btn>
         </v-form>
@@ -17,7 +17,7 @@
     </v-dialog>
 
 
-    <v-data-table :items="categories"
+    <v-data-table :loading="readAllLoading" :items="categories"
                   :headers="headers"
 
                   style="width: fit-content">
@@ -61,7 +61,7 @@
         </v-card-title>
         <v-form>
           <v-text-field v-model="updatedCategory.name" placeholder="Name" class="justify-center m-sm-5" required/>
-          <v-btn flat color="primary" @click="updateCategory(updatedCategory)">Update</v-btn>
+          <v-btn flat color="primary" @click="updateCategory(updatedCategory)" :loading="updateLoading">Update</v-btn>
 
           <v-btn color="error" flat @click="enableUpdate = false">Cancel</v-btn>
         </v-form>
@@ -79,6 +79,9 @@
 
     data() {
       return {
+        updateLoading: false,
+        createLoading: false,
+        readAllLoading: false,
         enableUpdate: false,
         selectedItem: null,
         updatedCategory: {
@@ -130,6 +133,7 @@
 
       readAllCategory() {
         console.log("Reading all categories ...")
+        this.readAllLoading = true;
         axios.get('http://localhost:8080/categories', {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
@@ -140,10 +144,13 @@
           // console.log(this.categories);
         }).catch(
           () => console.log("Cannot found any result!")
-        )
+        ).finally(() => {
+          this.readAllLoading = false;
+        })
       },
 
       createCategory() {
+        this.createLoading = true;
         axios.post("http://localhost:8080/categories", this.newCategory, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
@@ -156,10 +163,13 @@
             this.readAllCategory();
             this.dialog = false;
           }
-        )
+        ).finally(() => {
+          this.createLoading = false;
+        })
       },
       updateCategory(item) {
         console.log('----- Start update -----')
+        this.updateLoading = true;
         axios.put("http://localhost:8080/categories/" + item.id, item, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
@@ -172,7 +182,9 @@
             this.readAllCategory();
             this.enableUpdate = false;
           }
-        )
+        ).finally(() => {
+          this.updateLoading = false;
+        })
         console.log('----- Finish update -----')
       },
 

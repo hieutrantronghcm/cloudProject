@@ -48,7 +48,7 @@
             </v-layout>
           </v-container>
 
-          <v-btn @click="createProduct" color="primary" type="submit">Create</v-btn>
+          <v-btn @click="createProduct" :loading="createLoading" color="primary" type="submit">Create</v-btn>
           <v-btn color="error" @click="dialog = false">Cancel</v-btn>
         </v-form>
       </v-card>
@@ -57,7 +57,8 @@
 
     <v-data-table :items="products"
                   :headers="headers"
-                  style="width: fit-content">
+                  style="width: fit-content"
+                  :loading="readAllLoading">
       <template slot="items" slot-scope="props" style="width: fit-content">
         <tr>
           <td>{{props.item.id}}</td>
@@ -124,7 +125,7 @@
             </v-layout>
           </v-container>
 
-          <v-btn flat color="primary" @click="updateProduct(updatedProduct)">Update</v-btn>
+          <v-btn flat color="primary" @click="updateProduct(updatedProduct)" :loading="updateLoading">Update</v-btn>
           <v-btn color="error" flat @click="enableUpdate = false">Cancel</v-btn>
         </v-form>
       </v-card>
@@ -139,6 +140,9 @@
     name: "ManageProduct",
     data() {
       return {
+        updateLoading: false,
+        createLoading: false,
+        readAllLoading: false,
         file: null,
         enableUpdate: false,
         selectedItem: null,
@@ -256,7 +260,7 @@
       },
 
       readAllProduct() {
-        console.log("Reading all products ...")
+        this.readAllLoading = true;
         axios.get('http://localhost:8080/products/all', {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
@@ -266,53 +270,16 @@
           this.products = response.data;
         }).catch(
           () => console.log("Cannot found any result!")
-        )
+        ).finally(() => {
+          this.readAllLoading = false;
+        })
       },
-
-
-      // createProduct() {
-      //   console.log(this.newProduct.image);
-      //   axios.post("http://localhost:8080/products", this.newProduct, {
-      //     headers: {
-      //       "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
-      //       "Content-type": 'application/json'
-      //     }
-      //   }).then(
-      //     res => {
-      //       this.products = [];
-      //       this.readAllProduct();
-      //       this.dialog = false;
-      //     }
-      //   )
-      // },
-      // createProduct() {
-      //   this.newProduct.image = this.newProduct.image[0];
-      //   console.log(this.newProduct.image);
-      //   console.log(this.newProduct.category);
-      //   console.log(this.newProduct.supplier);
-      //   let formData = new FormData();
-      //   formData.append('newProduct', this.newProduct)
-      //   formData.append('category', this.newProduct.category)
-      //   formData.append('supplier',this.newProduct.supplier)
-      //   axios.post("http://localhost:8080/products", formData, {
-      //     headers: {
-      //       "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
-      //       "Content-type": 'multipart/form-data',
-      //       'boundary': 'XXX'
-      //     }
-      //   }).then(
-      //     res => {
-      //       this.products = [];
-      //       this.readAllProduct();
-      //       this.dialog = false;
-      //     }
-      //   )
-      // },
 
       createProduct() {
         this.file = this.file[0];
         let formData = new FormData();
         formData.append('file', this.file);
+        this.createLoading = true;
         axios.post("http://localhost:8080/products/image", formData, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
@@ -335,11 +302,14 @@
               this.readAllProduct();
               this.dialog = false;
             }
-          )
+          ).finally(() => {
+            this.createLoading = false;
+          })
         })
       },
 
       updateProduct(item) {
+        this.updateLoading = true;
         axios.put("http://localhost:8080/products/" + item.id, item, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
@@ -351,7 +321,9 @@
             this.readAllProduct();
             this.enableUpdate = false;
           }
-        )
+        ).finally(() => {
+          this.updateLoading = false;
+        })
       },
 
       deleteProduct(item) {

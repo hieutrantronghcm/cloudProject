@@ -26,7 +26,7 @@
             </v-layout>
           </v-container>
 
-          <v-btn @click="createSupplier" color="primary">Create</v-btn>
+          <v-btn @click="createSupplier" :loading="createLoading" color="primary">Create</v-btn>
           <v-btn color="error" @click="dialog = false">Cancel</v-btn>
         </v-form>
       </v-card>
@@ -35,7 +35,8 @@
 
     <v-data-table :items="suppliers"
                   :headers="headers"
-                  style="width: fit-content">
+                  style="width: fit-content"
+                  :loading="readAllLoading">
       <template slot="items" slot-scope="props" style="width: fit-content">
         <tr>
           <td>{{props.item.id}}</td>
@@ -78,7 +79,7 @@
             </v-layout>
           </v-container>
 
-          <v-btn flat color="primary" @click="updateSupplier(updatedSupplier)">Update</v-btn>
+          <v-btn flat color="primary" @click="updateSupplier(updatedSupplier)" :loading="updateLoading">Update</v-btn>
           <v-btn color="error" flat @click="enableUpdate = false">Cancel</v-btn>
         </v-form>
       </v-card>
@@ -92,6 +93,9 @@
         name: "ManageSupplier",
       data() {
         return {
+          updateLoading: false,
+          createLoading: false,
+          readAllLoading: false,
           enableUpdate: false,
           // selectedItem: null,
           updatedSupplier: {},
@@ -148,6 +152,7 @@
       methods: {
         readAllSupplier() {
           console.log("Reading all suppliers ...")
+          this.readAllLoading = true;
           axios.get('http://localhost:8080/suppliers', {
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
@@ -157,10 +162,13 @@
             this.suppliers = response.data;
           }).catch(
             () => console.log("Cannot found any result!")
-          )
+          ).finally(() => {
+            this.readAllLoading = false;
+          })
         },
 
         createSupplier() {
+          this.createLoading = true;
           axios.post("http://localhost:8080/suppliers", this.newSupplier, {
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
@@ -172,10 +180,13 @@
               this.readAllSupplier();
               this.dialog = false;
             }
-          )
+          ).finally(() => {
+            this.createLoading = false;
+          })
         },
 
         updateSupplier(item) {
+          this.updateLoading = true;
           axios.put("http://localhost:8080/suppliers/" + item.id, item, {
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
@@ -187,7 +198,9 @@
               this.readAllSupplier();
               this.enableUpdate = false;
             }
-          )
+          ).finally(() => {
+            this.updateLoading = false;
+          })
         },
 
         deleteSupplier(item) {

@@ -19,6 +19,9 @@
           Register
         </b-nav-item>
 
+        <b-nav-item v-if="this.haveToken == true" @click="goPayment">
+          Payment
+        </b-nav-item>
 
         <b-nav-item v-if="this.haveToken == true" @click="goCart" class="mr-5">
           <img src="../assets/shopping-cart.png" height="20px" width="20px"/>
@@ -70,6 +73,9 @@
       goLogin() {
         this.$router.push("/login")
       },
+      goPayment() {
+        this.$root.$emit('view-payment');
+      },
       goCart() {
         this.$root.$emit('view-cart');
       },
@@ -78,10 +84,8 @@
       },
       tokenExist() {
         if (localStorage.getItem("cdpmToken") !== null) {
-          // console.log("co token");
           this.haveToken = true;
         } else {
-          // console.log("ko co token");
           this.haveToken = false;
         }
       },

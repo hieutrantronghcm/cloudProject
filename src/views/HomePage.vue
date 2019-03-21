@@ -24,7 +24,7 @@
 
       </v-select>
       <v-container>
-        <v-data-iterator :items="products" content-tag="v-layout"
+        <v-data-iterator :items="products" content-tag="v-layout" v-if="!readAllLoading"
                          row wrap :rows-per-page-items="rowsPerPageItems" hide-actions>
           <template v-slot:item="props">
             <v-flex xs12 sm6 md4 lg3>
@@ -55,6 +55,7 @@
             </v-flex>
           </template>
         </v-data-iterator>
+        <v-progress-linear indeterminate :active="readAllLoading"></v-progress-linear>
       </v-container>
       <v-pagination v-model="pagination.page" :length="pagination.length" :total-visible="7"
                     @next="readAllProduct" @input="readAllProduct" @previous="readAllProduct">
@@ -133,7 +134,7 @@
                           <img class="img-fluid" v-bind:src="props.item.product.imgURL"
                                v-if="props.item.product.imgURL != ''"/>
                           <img class="img-fluid" src="../assets/no-image.png"
-                               v-if="props.item.product.imgURL == ''" >
+                               v-if="props.item.product.imgURL == ''">
                         </v-card-text>
                       </v-card>
 
@@ -165,10 +166,10 @@
                               <v-card style="background-color: white" width="155px" flat>
                                 <v-card-text>
                                   <b-form-input
-                                                type="number"
-                                                min="1"
-                                                v-bind:max="productDetail.quantity"
-                                                v-model="props.item.quantity" v-on:change="changeQuantity"/>
+                                    type="number"
+                                    min="1"
+                                    v-bind:max="productDetail.quantity"
+                                    v-model="props.item.quantity" v-on:change="changeQuantity"/>
                                 </v-card-text>
                               </v-card>
                             </v-layout>
@@ -205,8 +206,9 @@
     <v-dialog v-model="flag.viewPayment" max-width="400px">
       <v-card>
         <div style="background-color: #26FF79; width: 100%; height: 150px">
-          <v-img src="https://www.studentvip.ca/content/school/widget/large/large_widget_be1f701b-a146-485c-9ca8-5421a959705e.png"
-                 width="90px" height="90px" class="mx-auto" style="top: 20%;"/>
+          <v-img
+            src="https://www.studentvip.ca/content/school/widget/large/large_widget_be1f701b-a146-485c-9ca8-5421a959705e.png"
+            width="90px" height="90px" class="mx-auto" style="top: 20%;"/>
         </div>
 
         <!--<v-divider></v-divider>-->
@@ -221,6 +223,43 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <div v-if="flag.viewPayments == true">
+      <v-data-table :headers="headers"
+      :items="payments"
+      expand
+      :loading="readAllPaymentLoading">
+        <template v-slot:items="props">
+          <tr @click="props.expanded = !props.expanded" class="table-">
+            <td>{{props.item.id}}</td>
+            <td>{{props.item.createdTime}}</td>
+            <td style="font-weight: bold; font-size: 16px">
+              ${{props.item.total}}
+            </td>
+          </tr>
+        </template>
+        <template v-slot:expand="props">
+          <h2>Details</h2>
+          <v-data-table :items="props.item.paymentDetails" :headers="detailHeaders" hide-actions>
+            <template v-slot:items="props">
+              <tr class="table-info">
+                <td>
+                  <img class="img-fluid" v-bind:src="props.item.product.imgURL" style="height: 50px; margin: 10px"
+                       v-if="props.item.product.imgURL != ''"/>
+                  <img class="img-fluid" src="../assets/no-image.png" style="height: 50px; margin: 10px"
+                       v-if="props.item.product.imgURL == ''">
+                </td>
+                <td>{{props.item.product.name}}</td>
+                <td>{{props.item.product.category.name}}</td>
+                <td>{{props.item.product.supplier.name}}</td>
+                <td>{{props.item.quantity}}</td>
+                <td>${{props.item.price}}</td>
+              </tr>
+            </template>
+          </v-data-table>
+        </template>
+      </v-data-table>
+    </div>
 
     <v-snackbar v-model="snackbar" top :timeout="2000">
       {{snackbarText}}
@@ -240,6 +279,61 @@
     },
     data() {
       return {
+        payments: [],
+        headers: [
+          {
+            text: "Payment Code",
+            sortable: true,
+            align: 'center',
+            value: "id"
+          },
+          {
+            text: "Buy Date",
+            sortable: true,
+            align: 'center',
+            value: 'date'
+          },
+          {
+            text: "Total",
+            sortable: true,
+            align: 'center',
+            value: 'total'
+          }
+        ],
+        detailHeaders: [
+          {
+            text: "Image",
+            align: 'center',
+            sortable: false
+          },
+          {
+            text: "Product",
+            align: 'center',
+            sortable: false
+          },
+          {
+            text: "Category",
+            align: 'center',
+            sortable: false
+          },
+          {
+            text: "Supplier",
+            align: 'center',
+            sortable: false
+          },
+          {
+            text: "Quantity",
+            align: 'center',
+            sortable: false
+          },
+          {
+            text: "Price",
+            align: 'center',
+            sortable: false
+          }
+        ],
+        readAllPaymentLoading: false,
+        readAllLoading: false,
         loading: false,
         snackbarText: '',
         snackbar: false,
@@ -273,6 +367,7 @@
           viewDetail: false,
           viewCart: false,
           viewPayment: false,
+          viewPayments: false
         },
         productDetail: {},
         searchValue: '',
@@ -321,6 +416,9 @@
     mounted: function () {
       this.$root.$on('view-cart', () => {
         this.viewCart();
+      });
+      this.$root.$on('view-payment', () => {
+        this.viewPayments();
       })
     },
     created: function () {
@@ -331,6 +429,35 @@
       }
     },
     methods: {
+      viewPayments() {
+        this.resetFlag();
+        this.flag.viewPayments = true;
+        this.readAllPaymentLoading = true;
+        axios.get("http://localhost:8080/payments", {
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
+            "Content-type": 'application/json',
+            "Access-Control-Allow-Origin": "*"
+          }
+        })
+          .then(res => {
+            this.payments = res.data;
+            let total = 0;
+            for (let i = 0; i < this.payments.length; i++) {
+              total = 0;
+              for (let j = 0; j < this.payments[i].paymentDetails.length; j++) {
+                total += parseInt(this.payments[i].paymentDetails[j].quantity, 10)  *
+                  parseInt(this.payments[i].paymentDetails[j].price, 10);
+              }
+              this.payments[i].total = total;
+              let date = this.payments[i].createdTime;
+              var index = date.indexOf("T");
+              this.payments[i].createdTime = date.slice(0, index);
+            }
+          }).finally(() => {
+            this.readAllPaymentLoading = false;
+        })
+      },
       getErrorQuantityMsg() {
         alert("Error")
       },
@@ -341,25 +468,24 @@
         this.getTotalItemInCart();
       },
       checkOut() {
-        if(localStorage.getItem("cart") != null) {
+        if (localStorage.getItem("cart") != null) {
           this.loading = true;
-          setTimeout(() => (
-            this.loading = false,
-              axios.post("http://localhost:8080/payments", this.carts, {
-                headers: {
-                  "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
-                  "Content-type": 'application/json'
-                }
-              })
-                .then(res => {
-                  if(res.data != "Quantity Exceed"){
-                    this.flag.viewPayment = true;
-                    this.deleteCart();
-                  } else {
-                    alert("Your quantity of product is invalid")
-                  }
-                })
-          ), 1000);
+          axios.post("http://localhost:8080/payments", this.carts, {
+            headers: {
+              "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
+              "Content-type": 'application/json'
+            }
+          })
+            .then(res => {
+              if (res.data != "Quantity Exceed") {
+                this.flag.viewPayment = true;
+                this.deleteCart();
+              } else {
+                alert("Your quantity of product is invalid")
+              }
+            }).finally(() => {
+            this.loading = false;
+          })
         }
       },
       getTotalItemInCart() {
@@ -401,6 +527,7 @@
         this.flag.viewDetail = false;
         this.flag.viewCart = false;
         this.flag.viewPayment = false;
+        this.flag.viewPayments = false;
       },
       clickCard(item) {
         this.resetFlag();
@@ -408,23 +535,28 @@
         this.productDetail = item;
       },
       buyItem(product) {
-        let existedProduct = false;
-        for (let i = 0; i < this.carts.length; i++) {
-          if (this.carts[i].product.id == product.id) {
-            this.carts[i].quantity = parseInt(this.carts[i].quantity, 10) + parseInt(this.selectedQuantity, 10);
-            existedProduct = true;
+        if (localStorage.getItem("cdpmToken") !== null) {
+          let existedProduct = false;
+          for (let i = 0; i < this.carts.length; i++) {
+            if (this.carts[i].product.id == product.id) {
+              this.carts[i].quantity = parseInt(this.carts[i].quantity, 10) + parseInt(this.selectedQuantity, 10);
+              existedProduct = true;
+            }
           }
+          if (existedProduct == false) {
+            this.cart.quantity = parseInt(this.selectedQuantity, 10);
+            this.cart.product = product;
+            this.carts.push(this.cart)
+          }
+          this.selectedQuantity = 1;
+          localStorage.setItem("cart", JSON.stringify(this.carts));
+          this.getTotalItemInCart();
+          this.snackbarText = "Added Product";
+          this.snackbar = true;
+        } else {
+          this.$router.push("/login");
         }
-        if (existedProduct == false) {
-          this.cart.quantity = parseInt(this.selectedQuantity, 10);
-          this.cart.product = product;
-          this.carts.push(this.cart)
-        }
-        this.selectedQuantity = 1;
-        localStorage.setItem("cart", JSON.stringify(this.carts));
-        this.getTotalItemInCart();
-        this.snackbarText = "Added Product";
-        this.snackbar = true;
+
       },
 
       search() {
@@ -440,6 +572,7 @@
           'size=' + this.pagination.size + '&' +
           'sort=' + this.pagination.sort.field + ',' + this.pagination.sort.order + '&' +
           'searchValue=' + this.searchValue;
+        this.readAllLoading = true;
         axios.get(url, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
@@ -452,7 +585,9 @@
           this.pagination.length = data.totalPages;
         }).catch(
           () => console.log("Cannot found any result!")
-        )
+        ).finally(() => {
+          this.readAllLoading = false;
+        })
       },
     }
   }
@@ -462,7 +597,8 @@
   .clickable {
     cursor: pointer;
   }
-  h4:hover{
+
+  h4:hover {
     color: #2196F3;
   }
 </style>

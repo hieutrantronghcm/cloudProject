@@ -16,6 +16,7 @@ import '@fortawesome/fontawesome-free/css/all.css'
 import '@mdi/font/css/materialdesignicons.css'
 import VueDebounce from 'vue-debounce'
 import LodashDebounce from 'lodash.debounce'
+import axios from 'axios'
 
 import Default from "./components/Default";
 import DashBoard from "./components/DashBoard";
@@ -61,5 +62,16 @@ Vue.use(Vuex)
 new Vue({
   router,
   store,
+  // mounted() {
+  //   axios.defaults.baseURL = "http://localhost:8080";
+  //   axios.interceptors.request.use(function (config) {
+  //     config.baseURL = "http://localhost:8080";
+  //     let token = localStorage.getItem("cdpmToken")
+  //     if(token) {
+  //       config.headers["Authorization"] = 'Bear ' + token;
+  //     }
+  //     return config;
+  //   })
+  // },
   render: h => h(App)
 }).$mount('#app')
