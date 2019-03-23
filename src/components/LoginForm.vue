@@ -37,7 +37,7 @@
       },
       login() {
 
-        axios.post('http://localhost:8080/login', this.account
+        axios.post('/login', this.account
         ).then(
           response => {
             console.log("cdpmToken : " + response.data.token);

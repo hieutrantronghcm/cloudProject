@@ -134,7 +134,7 @@
       readAllCategory() {
         console.log("Reading all categories ...")
         this.readAllLoading = true;
-        axios.get('http://localhost:8080/categories', {
+        axios.get('/categories', {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
             "Content-type": 'application/json'
@@ -151,7 +151,7 @@
 
       createCategory() {
         this.createLoading = true;
-        axios.post("http://localhost:8080/categories", this.newCategory, {
+        axios.post("/categories", this.newCategory, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
             "Content-type": 'application/json'
@@ -170,7 +170,7 @@
       updateCategory(item) {
         console.log('----- Start update -----')
         this.updateLoading = true;
-        axios.put("http://localhost:8080/categories/" + item.id, item, {
+        axios.put("/categories/" + item.id, item, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
             "Content-type": 'application/json'
@@ -189,7 +189,7 @@
       },
 
       deleteCategory(item) {
-        axios.get("http://localhost:8080/products/category/" + item.id, {
+        axios.get("/products/category/" + item.id, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
             "Content-type": 'application/json'
@@ -198,7 +198,7 @@
           res => {
             if (res.data.length == 0) {
               if (confirm("Delete category: " + item.name + " ?")) {
-                axios.delete("http://localhost:8080/categories/" + item.id, {
+                axios.delete("/categories/" + item.id, {
                   headers: {
                     "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
                     "Content-type": 'application/json'
@@ -220,7 +220,7 @@
       },
 
       isHavingProduct(item) {
-        axios.get("http://localhost:8080/products/category/" + item.id, {
+        axios.get("/products/category/" + item.id, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
             "Content-type": 'application/json'

@@ -52,6 +52,8 @@ Vue.use(BootstrapVue)
 Vue.use(VueIcon, 'v-icon')
 Vue.use(Vuex)
 
+axios.defaults.baseURL = `http://CloudApi-env-1.4hzzpupupu.ap-southeast-1.elasticbeanstalk.com`;
+
 /* eslint-disable no-new */
 // new Vue({
 //   el: '#app',

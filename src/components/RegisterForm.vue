@@ -60,7 +60,7 @@
       },
       checkUsernameExist() {
 
-        return axios.get('http://localhost:8080/users/check?username=' + this.account.username, {
+        return axios.get('/users/check?username=' + this.account.username, {
           headers: {
             "Access-Control-Allow-Origin": "*"
           }
@@ -79,7 +79,7 @@
       },
 
       register() {
-        axios.post('http://localhost:8080/users', this.account
+        axios.post('/users', this.account
         ).then(response => {
             console.log(res);
             this.$router.push('/login');

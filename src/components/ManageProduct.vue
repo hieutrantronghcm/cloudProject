@@ -234,7 +234,7 @@
       },
 
       readAllSupplier() {
-        axios.get('http://localhost:8080/suppliers', {
+        axios.get('/suppliers', {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
             "Content-type": 'application/json'
@@ -247,7 +247,7 @@
       },
 
       readAllCategory() {
-        axios.get('http://localhost:8080/categories', {
+        axios.get('/categories', {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
             "Content-type": 'application/json'
@@ -261,13 +261,14 @@
 
       readAllProduct() {
         this.readAllLoading = true;
-        axios.get('http://localhost:8080/products/all', {
+        axios.get('/products/all', {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
             "Content-type": 'application/json'
           }
         }).then(response => {
           this.products = response.data;
+          console.log(this.products);
         }).catch(
           () => console.log("Cannot found any result!")
         ).finally(() => {
@@ -280,7 +281,7 @@
         let formData = new FormData();
         formData.append('file', this.file);
         this.createLoading = true;
-        axios.post("http://localhost:8080/products/image", formData, {
+        axios.post("/products/image", formData, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
             "Content-type": 'multipart/form-data',
@@ -291,7 +292,7 @@
           this.newProduct.imgURL = '' + res.data;
           console.log(this.newProduct.imgURL);
           console.log(this.newProduct);
-          axios.post("http://localhost:8080/products", this.newProduct, {
+          axios.post("/products", this.newProduct, {
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
               "Content-type": 'application/json'
@@ -310,7 +311,7 @@
 
       updateProduct(item) {
         this.updateLoading = true;
-        axios.put("http://localhost:8080/products/" + item.id, item, {
+        axios.put("/products/" + item.id, item, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
             "Content-type": 'application/json'
@@ -328,7 +329,7 @@
 
       deleteProduct(item) {
         if (confirm("Delete product ID: " + item.id + " - Name: " + item.name + " ?")) {
-          axios.delete("http://localhost:8080/products/" + item.id, {
+          axios.delete("/products/" + item.id, {
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
               "Content-type": 'application/json'

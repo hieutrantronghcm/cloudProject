@@ -153,7 +153,7 @@
         readAllSupplier() {
           console.log("Reading all suppliers ...")
           this.readAllLoading = true;
-          axios.get('http://localhost:8080/suppliers', {
+          axios.get('/suppliers', {
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
               "Content-type": 'application/json'
@@ -169,7 +169,7 @@
 
         createSupplier() {
           this.createLoading = true;
-          axios.post("http://localhost:8080/suppliers", this.newSupplier, {
+          axios.post("/suppliers", this.newSupplier, {
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
               "Content-type": 'application/json'
@@ -187,7 +187,7 @@
 
         updateSupplier(item) {
           this.updateLoading = true;
-          axios.put("http://localhost:8080/suppliers/" + item.id, item, {
+          axios.put("/suppliers/" + item.id, item, {
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
               "Content-type": 'application/json'
@@ -204,7 +204,7 @@
         },
 
         deleteSupplier(item) {
-          axios.get("http://localhost:8080/products/supplier/" + item.id, {
+          axios.get("/products/supplier/" + item.id, {
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
               "Content-type": 'application/json'
@@ -213,7 +213,7 @@
             res => {
               if (res.data.length == 0) {
                 if (confirm("Delete supplier ID: " + item.id + " - Name: " + item.name + " ?")) {
-                  axios.delete("http://localhost:8080/suppliers/" + item.id, {
+                  axios.delete("/suppliers/" + item.id, {
                     headers: {
                       "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
                       "Content-type": 'application/json'

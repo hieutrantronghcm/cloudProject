@@ -567,7 +567,7 @@
       },
 
       readAllProduct() {
-        var url = 'http://localhost:8080/products?' +
+        const url = '/products?' +
           'page=' + (this.pagination.page - 1) + '&' +
           'size=' + this.pagination.size + '&' +
           'sort=' + this.pagination.sort.field + ',' + this.pagination.sort.order + '&' +
