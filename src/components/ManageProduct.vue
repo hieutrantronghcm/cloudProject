@@ -39,7 +39,7 @@
 
               <v-flex xs6>
                 <b-form-file v-model="file" ref="fileInput" accept="image/*" multiple placeholder="Product Image"/>
-                <v-btn color="info"  flat small outline @click="clearFile">Reset image</v-btn>
+                <v-btn color="info" flat small outline @click="clearFile">Reset image</v-btn>
               </v-flex>
               <v-flex xs12>
                 <v-textarea v-model="newProduct.description" label="Description" outline auto-grow
@@ -63,7 +63,7 @@
         <tr>
           <td>{{props.item.id}}</td>
           <td>
-            <img v-bind:src="props.item.imgURL" v-if="props.item.imgURL != ''" height="200" width="200"/>
+            <img :src="props.item.imgURL" v-if="props.item.imgURL != ''" height="200" width="200"/>
             <img src="../assets/no-image.png" v-if="props.item.imgURL == ''" width="200" height="200">
           </td>
           <td>{{props.item.name}}</td>
@@ -281,7 +281,7 @@
         let formData = new FormData();
         formData.append('file', this.file);
         this.createLoading = true;
-        axios.post("/products/image", formData, {
+        axios.post("/image", formData, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
             "Content-type": 'multipart/form-data',
@@ -306,6 +306,8 @@
           ).finally(() => {
             this.createLoading = false;
           })
+        }).catch(error => {
+          console.log(error.response.data);
         })
       },
 

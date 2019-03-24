@@ -53,6 +53,7 @@ Vue.use(VueIcon, 'v-icon')
 Vue.use(Vuex)
 
 axios.defaults.baseURL = `http://CloudApi-env-1.4hzzpupupu.ap-southeast-1.elasticbeanstalk.com`;
+// axios.defaults.baseURL = `http://localhost:8080`;
 
 /* eslint-disable no-new */
 // new Vue({
