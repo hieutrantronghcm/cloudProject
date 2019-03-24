@@ -433,7 +433,7 @@
         this.resetFlag();
         this.flag.viewPayments = true;
         this.readAllPaymentLoading = true;
-        axios.get("http://localhost:8080/payments", {
+        axios.get("/payments", {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
             "Content-type": 'application/json',
@@ -470,7 +470,7 @@
       checkOut() {
         if (localStorage.getItem("cart") != null) {
           this.loading = true;
-          axios.post("http://localhost:8080/payments", this.carts, {
+          axios.post("/payments", this.carts, {
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("cdpmToken")}`,
               "Content-type": 'application/json'

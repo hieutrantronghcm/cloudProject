@@ -11,9 +11,11 @@
           <v-text-field :rules="[rules.usernameRequired]" v-model="account.username" label="Username">
           </v-text-field>
 
-          <v-text-field :rules="[rules.passwordRequired]" v-model="account.password" label="Password" :type="'password'"></v-text-field>
+          <v-text-field :rules="[rules.passwordRequired]" v-model="account.password" label="Password"
+                        :type="'password'"></v-text-field>
 
-          <v-text-field :rules="[rules.mismatchPassword, rules.passwordRequired]" ref="repass" label="Re-enter password" :type="'password'">
+          <v-text-field :rules="[rules.mismatchPassword, rules.passwordRequired]" ref="repass" label="Re-enter password"
+                        :type="'password'">
           </v-text-field>
 
           <v-text-field v-model="account.email" :type="'email'" label="Email"></v-text-field>
@@ -28,6 +30,7 @@
 <script>
   import axios from 'axios';
   import _ from 'lodash.debounce';
+
   export default {
     name: "RegisterForm",
     data() {
@@ -49,7 +52,7 @@
       }
     },
     watch: {
-      isUsernameExisted: function() {
+      isUsernameExisted: function () {
         this.checkUsernameExist();
       }
     },
@@ -72,20 +75,22 @@
             console.log(this.isUsernameExisted + " - " + this.account.username)
             return res.data;
           }).catch(
-          error => {
-            console.log("Cannot found any result!");
-          }
-        )
+            error => {
+              console.log("Cannot found any result!");
+            }
+          )
       },
 
       register() {
         axios.post('/users', this.account
         ).then(response => {
-            console.log(res);
             this.$router.push('/login');
           }
         ).catch(error => {
-          alert(error.response.data.message);
+          if (error.response.data) {
+            alert(error.response.data.message)
+          }
+          console.log(error.response)
         })
       }
     }
